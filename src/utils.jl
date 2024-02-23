@@ -16,6 +16,6 @@ function all_constraints_affexpr(model::Model)
     return cstr
 end
 
-function value_int(x)
+function value_int(con)
     return value(x -> is_integer(x) || is_binary(x) ? round(Int, value(x)) : value(x), con)
 end
