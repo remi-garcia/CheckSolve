@@ -24,7 +24,7 @@ function check_result(model::Model; ignore_floats::Bool=false, kwargs...)::Float
         if ignore_floats
             cst_object = constraint_object(curr_constraint)
             cst_variables = [k for k in keys(cst_object.func.terms)]
-            has_float_var = true in [is_binary.(cst_variables) || is_integer.(cst_variables)]
+            has_float_var = true in [is_binary.(cst_variables) .|| is_integer.(cst_variables)]
             if !has_float_var
                 continue
             end
