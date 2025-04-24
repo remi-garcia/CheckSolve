@@ -38,4 +38,10 @@ end
 function is_exact(model::Model; kwargs...)
     return check_result(model; kwargs...) == 0.0 
 end
+
+function simplify_model!(model::Model; kwargs...)
+    fix_int!(model)
+    simplify_fix_var!(model)
+
+    return model
 end
