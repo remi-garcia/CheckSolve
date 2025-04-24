@@ -35,6 +35,25 @@ function check_result(model::Model; ignore_floats::Bool=false, kwargs...)::Float
     return maximum(val_check_results)
 end
 
+function count_constraint_errors(model::Model; ignore_floats::Bool=false, kwargs...)::Float64
+    all_cons = all_constraints_affexpr(model)
+    val_check_results = zeros(length(all_cons))
+    for i in 1:length(all_cons)
+        curr_constraint = all_cons[i]
+        if ignore_floats
+            cst_object = constraint_object(curr_constraint)
+            cst_variables = [k for k in keys(cst_object.func.terms)]
+            has_float_var = true in [is_binary.(cst_variables) .|| is_integer.(cst_variables)]
+            if !has_float_var
+                continue
+            end
+        end
+        val_check_results[i] = check_constraint(curr_constraint; kwargs...)
+    end
+
+    return count(x -> x != 0, val_check_results)
+end
+
 function is_exact(model::Model; kwargs...)
     return check_result(model; kwargs...) == 0.0 
 end
