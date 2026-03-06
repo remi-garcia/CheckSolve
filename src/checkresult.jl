@@ -86,7 +86,7 @@ function check_result(model::Model; ignore_floats::Bool=false, print_cst_check::
         if i <= length(all_cons_affexpr)
             println("Constraint: $(all_cons_affexpr[i])")
         else
-            println("Constraint: $(all_cons_ind_affexpr[length(all_cons_affexpr)+i])")
+            println("Constraint: $(all_cons_ind_affexpr[i-length(all_cons_affexpr)])")
         end
         println("\tError: $(val_check_results[i])")
     end
