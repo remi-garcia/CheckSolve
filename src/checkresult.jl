@@ -1,33 +1,45 @@
-function check_constraint(con::ConstraintRef, set::MOI.LessThan; round_int::Bool=true, kwargs...)
-    if round_int
-        return max(0.0, value_int(con) - set.upper)
-    end
-    return max(0.0, value(con) - set.upper)
+function check_constraint(val::Float64, set::MOI.LessThan; kwargs...)::Float64
+    return max(0.0, val - set.upper)
 end
-function check_constraint(con::ConstraintRef, set::MOI.GreaterThan; round_int::Bool=true, kwargs...)
-    if round_int
-        return max(0.0, set.lower - value_int(con))
-    end
-    return max(0.0, set.lower - value(con))
+function check_constraint(val::Float64, set::MOI.GreaterThan; kwargs...)::Float64
+    return max(0.0, set.lower - val)
 end
-function check_constraint(con::ConstraintRef, set::MOI.EqualTo; round_int::Bool=true, kwargs...)
-    if round_int
-        return abs(value_int(con) - set.value)
-    end
-    return abs(value(con) - set.value)
+function check_constraint(val::Float64, set::MOI.EqualTo; kwargs...)::Float64
+    return abs(val - set.value)
 end
-function check_constraint(con::ConstraintRef, set::MOI.Interval; round_int::Bool=true, kwargs...)
-    if round_int
-        return max(max(0.0, value_int(con) - set.upper), max(0.0, set.lower - value_int(con)))
-    end
-    return max(max(0.0, value(con) - set.upper), max(0.0, set.lower - value(con)))
+function check_constraint(val::Float64, set::MOI.Interval; kwargs...)::Float64
+    return max(max(0.0, val - set.upper), max(0.0, set.lower - val))
 end
 
-function check_constraint(con::ConstraintRef, set::MOI.Indicator; kwargs...)
-    return check_constraint(con, set.set; kwargs...)
+function check_constraint(con::ConstraintRef, set::Union{MOI.LessThan, MOI.GreaterThan, MOI.EqualTo, MOI.Interval}; round_int::Bool=true, kwargs...)::Float64
+    if round_int
+        return check_constraint(value_int(con), set)
+    end
+    return check_constraint(value(con), set)
 end
 
-function check_constraint(con::ConstraintRef; kwargs...)
+function _check_constraint(con::ConstraintRef, set::MOI.Indicator; round_int::Bool=true, kwargs...)::Float64
+    if round_int
+        return check_constraint(value_int(con)[2], set.set; kwargs...)
+    end
+    return check_constraint(value(con)[2], set.set; kwargs...)
+end
+
+function check_constraint(con::ConstraintRef, set::MOI.Indicator{MOI.ACTIVATE_ON_ONE}; kwargs...)::Float64
+    if iszero(value_int(con)[1])
+        return 0.0
+    end
+    return _check_constraint(con, set; kwargs...)
+end
+
+function check_constraint(con::ConstraintRef, set::MOI.Indicator{MOI.ACTIVATE_ON_ZERO}; kwargs...)::Float64
+    if isone(value_int(con)[1])
+        return 0.0
+    end
+    return _check_constraint(con, set; kwargs...)
+end
+
+function check_constraint(con::ConstraintRef; kwargs...)::Float64
     set = reshape_set(moi_set(constraint_object(con)), shape(constraint_object(con)))
     return check_constraint(con, set; kwargs...)
 end
