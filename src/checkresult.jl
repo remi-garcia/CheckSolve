@@ -23,6 +23,10 @@ function check_constraint(con::ConstraintRef, set::MOI.Interval; round_int::Bool
     return max(max(0.0, value(con) - set.upper), max(0.0, set.lower - value(con)))
 end
 
+function check_constraint(con::ConstraintRef, set::MOI.Indicator; kwargs...)
+    return check_constraint(con, set.set; kwargs...)
+end
+
 function check_constraint(con::ConstraintRef; kwargs...)
     set = reshape_set(moi_set(constraint_object(con)), shape(constraint_object(con)))
     return check_constraint(con, set; kwargs...)
