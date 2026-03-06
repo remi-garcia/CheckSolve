@@ -9,7 +9,16 @@ end
 function all_constraints_affexpr(model::Model)
     cstr = Vector{ConstraintRef}()
     for (F, S) in list_of_constraint_types(model)
-        if F == AffExpr || F == Vector{AffExpr}
+        if F == AffExpr
+            append!(cstr, all_constraints(model, F, S))
+        end
+    end
+    return cstr
+end
+function all_constraints_ind_affexpr(model::Model)
+    cstr = Vector{ConstraintRef}()
+    for (F, S) in list_of_constraint_types(model)
+        if F == Vector{AffExpr}
             append!(cstr, all_constraints(model, F, S))
         end
     end

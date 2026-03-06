@@ -45,10 +45,11 @@ function check_constraint(con::ConstraintRef; kwargs...)::Float64
 end
 
 function check_result(model::Model; ignore_floats::Bool=false, print_cst_check::Bool=false, print_all_cst_check::Bool=false, kwargs...)::Float64
-    all_cons = all_constraints_affexpr(model)
-    val_check_results = zeros(length(all_cons))
-    for i in 1:length(all_cons)
-        curr_constraint = all_cons[i]
+    all_cons_affexpr = all_constraints_affexpr(model)
+    all_cons_ind_affexpr = all_constraints_ind_affexpr(model)
+    val_check_results = zeros(length(all_cons_affexpr)+length(all_cons_ind_affexpr))
+    for i in 1:length(all_cons_affexpr)
+        curr_constraint = all_cons_affexpr[i]
         if ignore_floats
             cst_object = constraint_object(curr_constraint)
             cst_variables = [k for k in keys(cst_object.func.terms)]
@@ -63,10 +64,30 @@ function check_result(model::Model; ignore_floats::Bool=false, print_cst_check::
             println("\tError: $(val_check_results[i])")
         end
     end
+    for i in 1:length(all_cons_ind_affexpr)
+        curr_constraint = all_cons_ind_affexpr[i]
+        if ignore_floats
+            cst_object = constraint_object(curr_constraint)
+            cst_variables = [k for k in keys(cst_object.func[2].terms)]
+            has_float_var = true in [is_binary.(cst_variables) .|| is_integer.(cst_variables)]
+            if !has_float_var
+                continue
+            end
+        end
+        val_check_results[length(all_cons_affexpr)+i] = check_constraint(curr_constraint; kwargs...)
+        if print_all_cst_check && !iszero(val_check_results[length(all_cons_affexpr)+i])
+            println("Constraint: $(curr_constraint)")
+            println("\tError: $(val_check_results[i])")
+        end
+    end
 
     if print_cst_check
         i = argmax(val_check_results)
-        println("Constraint: $(all_cons[i])")
+        if i <= length(all_cons_affexpr)
+            println("Constraint: $(all_cons_affexpr[i])")
+        else
+            println("Constraint: $(all_cons_ind_affexpr[length(all_cons_affexpr)+i])")
+        end
         println("\tError: $(val_check_results[i])")
     end
 
