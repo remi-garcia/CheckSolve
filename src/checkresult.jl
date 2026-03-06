@@ -1,14 +1,26 @@
-function check_constraint(con::ConstraintRef, set::MOI.LessThan; kwargs...)
-    return max(0.0, value_int(con) - set.upper)
+function check_constraint(con::ConstraintRef, set::MOI.LessThan; round_int::Bool=true, kwargs...)
+    if round_int
+        return max(0.0, value_int(con) - set.upper)
+    end
+    return max(0.0, value(con) - set.upper)
 end
-function check_constraint(con::ConstraintRef, set::MOI.GreaterThan; kwargs...)
-    return max(0.0, set.lower - value_int(con))
+function check_constraint(con::ConstraintRef, set::MOI.GreaterThan; round_int::Bool=true, kwargs...)
+    if round_int
+        return max(0.0, set.lower - value_int(con))
+    end
+    return max(0.0, set.lower - value(con))
 end
-function check_constraint(con::ConstraintRef, set::MOI.EqualTo; kwargs...)
-    return abs(value_int(con) - set.value)
+function check_constraint(con::ConstraintRef, set::MOI.EqualTo; round_int::Bool=true, kwargs...)
+    if round_int
+        return abs(value_int(con) - set.value)
+    end
+    return abs(value(con) - set.value)
 end
-function check_constraint(con::ConstraintRef, set::MOI.Interval; kwargs...)
-    return max(max(0.0, value_int(con) - set.upper), max(0.0, set.lower - value_int(con)))
+function check_constraint(con::ConstraintRef, set::MOI.Interval; round_int::Bool=true, kwargs...)
+    if round_int
+        return max(max(0.0, value_int(con) - set.upper), max(0.0, set.lower - value_int(con)))
+    end
+    return max(max(0.0, value(con) - set.upper), max(0.0, set.lower - value(con)))
 end
 
 function check_constraint(con::ConstraintRef; kwargs...)
