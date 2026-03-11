@@ -93,10 +93,11 @@ function check_result(
 
     if print_cst_check
         i = argmax(val_check_results)
-        curr_constraint = all_cons_affexpr[i]
+        index_cstr = i
         if i > length(all_cons_affexpr)
-            curr_constraint = all_cons_ind_affexpr[i-length(all_cons_affexpr)]
+            index_cstr = i-length(all_cons_affexpr)
         end
+        curr_constraint = all_cons_affexpr[index_cstr]
         println("Constraint: $(curr_constraint)")
         println("\tError: $(val_check_results[i])")
         if print_var_values
