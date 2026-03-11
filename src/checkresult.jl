@@ -86,7 +86,7 @@ function check_result(
             println("Constraint: $(curr_constraint)")
             println("\tError: $(val_check_results[i])")
             if print_var_values
-                print_values_in_cst(model, curr_constraint)
+                print_values_in_cst(curr_constraint)
             end
         end
     end
@@ -100,7 +100,7 @@ function check_result(
         println("Constraint: $(curr_constraint)")
         println("\tError: $(val_check_results[i])")
         if print_var_values
-            print_values_in_cst(model, curr_constraint)
+            print_values_in_cst(curr_constraint)
         end
     end
 
