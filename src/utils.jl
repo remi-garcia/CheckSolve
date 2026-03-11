@@ -73,7 +73,7 @@ function var_in_constraint(con::ConstraintRef)
     return _var_in_constraint(constraint_object(con).func)
 end
 
-function print_values_in_cst(con::ConstraintRef; ignore_vars::Vector{VariableRef})
+function print_values_in_cst(con::ConstraintRef; ignore_vars::Vector{VariableRef}=Vector{VariableRef}())
     var_in = setdiff(var_in_constraint(con), ignore_vars)
     for curr_var_in in var_in
         println("$(name(curr_var_in)) = $(value(curr_var_in))")
