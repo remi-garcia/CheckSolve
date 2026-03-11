@@ -44,7 +44,14 @@ function check_constraint(con::ConstraintRef; kwargs...)::Float64
     return check_constraint(con, set; kwargs...)
 end
 
-function check_result(model::Model; ignore_floats::Bool=false, print_cst_check::Bool=false, print_all_cst_check::Bool=false, kwargs...)::Float64
+function check_result(
+        model::Model;
+        ignore_floats::Bool=false,
+        print_cst_check::Bool=false,
+        print_all_cst_check::Bool=false,
+        print_var_values::Bool=false,
+        kwargs...
+    )::Float64
     all_cons_affexpr = all_constraints_affexpr(model)
     all_cons_ind_affexpr = all_constraints_ind_affexpr(model)
     val_check_results = zeros(length(all_cons_affexpr)+length(all_cons_ind_affexpr))
@@ -78,17 +85,23 @@ function check_result(model::Model; ignore_floats::Bool=false, print_cst_check::
         if print_all_cst_check && !iszero(val_check_results[length(all_cons_affexpr)+i])
             println("Constraint: $(curr_constraint)")
             println("\tError: $(val_check_results[i])")
+            if print_var_values
+                print_values_in_cst(model, curr_constraint)
+            end
         end
     end
 
     if print_cst_check
         i = argmax(val_check_results)
-        if i <= length(all_cons_affexpr)
-            println("Constraint: $(all_cons_affexpr[i])")
-        else
-            println("Constraint: $(all_cons_ind_affexpr[i-length(all_cons_affexpr)])")
+        curr_constraint = all_cons_affexpr[i]
+        if i > length(all_cons_affexpr)
+            curr_constraint = all_cons_ind_affexpr[i-length(all_cons_affexpr)]
         end
+        println("Constraint: $(curr_constraint)")
         println("\tError: $(val_check_results[i])")
+        if print_var_values
+            print_values_in_cst(model, curr_constraint)
+        end
     end
 
     return maximum(val_check_results)

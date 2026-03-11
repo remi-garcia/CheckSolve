@@ -61,3 +61,23 @@ function simplify_fix_var!(model::Model)
 
     return model
 end
+
+function _var_in_constraint(con::AffExpr)
+    return [k for k in keys(con.terms)]
+end
+function _var_in_constraint(con::Vector{AffExpr})
+    return reduce(vcat, [_var_in_constraint(curr_con) for curr_con in con])
+end
+
+function var_in_constraint(con::ConstraintRef)
+    return _var_in_constraint(constraint_object(con).func)
+end
+
+function print_values_in_cst(con::ConstraintRef; ignore_vars::Vector{VariableRef})
+    var_in = setdiff(var_in_constraint(con), ignore_vars)
+    for curr_var_in in var_in
+        println("$(name(curr_var_in)) = $(value(curr_var_in))")
+    end
+
+    return nothing
+end
