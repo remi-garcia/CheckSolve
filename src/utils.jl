@@ -35,7 +35,7 @@ function fix_int!(model::Model)
     for var_name in all_variable_names
         var_curr = variable_by_name(model, var_name)
         if is_integer(var_curr) || is_binary(var_curr)
-            var_val = round(Int, var_val)
+            var_val = round(Int, value(var_curr))
             all_values[var_name] = var_val
         end
     end
@@ -48,12 +48,14 @@ function fix_int!(model::Model)
     return model
 end
 
+# Call this after fix_int!(model)
 function simplify_fix_var!(model::Model)
     cstr = all_constraints_affexpr(model)
     for curr_constraint in cstr
         cst_object = constraint_object(curr_constraint)
         cst_variables = [k for k in keys(cst_object.func.terms)]
         for curr_variable in cst_variables
+            @assert is_fixed(curr_variable)
             set_normalized_rhs(curr_constraint, normalized_rhs(curr_constraint)-normalized_coefficient(curr_constraint, curr_variable)*fix_value(curr_variable))
             set_normalized_coefficient(curr_constraint, curr_variable, 0)
         end
